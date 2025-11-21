@@ -1,3 +1,5 @@
 .venv/*
 .idea/*
-
+agent/__pycache__/*
+tests/__pycache__/*
+tests/agent/__pycache__/*
