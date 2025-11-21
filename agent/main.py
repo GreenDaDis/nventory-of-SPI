@@ -1,50 +1,84 @@
-from windows.scanner import WindowsScanner
+import time
+
+from agent.windows import WindowsService
 
 
-# Example usage
+# Пример использования с демонстрацией
 if __name__ == "__main__":
-    # Create scanner instance
-    scanner = WindowsScanner()
+    # Создаем callback функции для демонстрации
+    def on_scan_start():
+        print("🎯 [Callback] Scan started!")
 
-    # Get data (if cache is empty - scan will start)
-    print("=== GETTING DATA ===")
-    data = scanner.get_data()
 
-    print(f"\n=== RESULTS ===")
-    print(f"Scan timestamp: {data['scan_timestamp']}")
-    print(f"Total software: {data['software_count']}")
-    print(f"From registry: {data['sources']['registry']}")
-    print(f"From WMIC: {data['sources']['wmic']}")
+    def on_scan_complete(data):
+        print(f"✅ [Callback] Scan completed! Found {data['software_count']} items")
 
-    # Show first 10 programs
-    print(f"\n=== FIRST 10 SOFTWARE ===")
-    for i, software in enumerate(data['software_list'][:10]):
-        print(f"{i + 1:2d}. {software['name']}")
-        print(f"     Version: {software['version'] or 'N/A'}")
-        print(f"     Vendor: {software['vendor'] or 'N/A'}")
-        print(f"     Install date: {software['install_date'] or 'N/A'}")
-        print(f"     Update date: {software['update_date'] or 'N/A'}")
-        print()
 
-    # Demonstrate cache usage
-    print("\n=== CACHE CHECK ===")
-    print("Requesting data again (should be from cache):")
-    cached_data = scanner.get_data()
-    print(f"Data from cache: {cached_data['software_count']} software")
+    def on_data_request():
+        print("📊 [Callback] Data requested")
 
-    # Additional methods demonstration
-    print("\n=== ADDITIONAL METHODS ===")
-    software_names = scanner.get_software_names()[:5]
-    print(f"First 5 software names: {software_names}")
 
-    # Find software by pattern
-    print("\n=== FINDING SOFTWARE ===")
-    browser_software = scanner.find_software_by_name("chrome")[:3]
-    print(f"Found {len(browser_software)} software with 'chrome':")
-    for software in browser_software:
-        print(f"  - {software['name']} (v{software['version']})")
+    # Создаем и настраиваем сервис
+    service = WindowsService(scan_interval=10)  # 10 секунд для демонстрации
 
-    # Clear cache
-    print("\n=== CLEARING CACHE ===")
-    scanner.clear_cache()
-    print("Cache cleared, next get_data() will trigger scan")
+    # Регистрируем callback'и
+    service.register_callbacks(
+        on_scan_start=on_scan_start,
+        on_scan_complete=on_scan_complete,
+        on_data_request=on_data_request
+    )
+
+    # Запускаем сервис
+    print("=== STARTING SERVICE ===")
+    service.start()
+
+    try:
+        # Демонстрация работы сервиса
+        print("\n=== DEMONSTRATION ===")
+
+        # Ждем немного для первого сканирования
+        time.sleep(2)
+
+        # Получаем данные
+        print("\n1. Getting current data...")
+        data = service.get_software_data()
+        if data:
+            print(f"   Current software count: {data['software_count']}")
+
+        # Принудительное сканирование
+        print("\n2. Forcing immediate scan...")
+        service.force_scan()
+
+        # Поиск ПО
+        print("\n3. Searching for software...")
+        browsers = service.find_software("chrome")
+        print(f"   Found {len(browsers)} Chrome-related software")
+
+        # Статус сервиса
+        print("\n4. Service status:")
+        status = service.get_service_status()
+        for key, value in status.items():
+            print(f"   {key}: {value}")
+
+        # Ждем для демонстрации автоматического сканирования
+        print("\n5. Waiting for automatic scan...")
+        time.sleep(15)
+
+        # Еще один статус
+        print("\n6. Final service status:")
+        status = service.get_service_status()
+        for key, value in status.items():
+            print(f"   {key}: {value}")
+
+        # Даем сервису поработать еще немного
+        print("\n=== SERVICE IS RUNNING IN BACKGROUND ===")
+        print("Press Ctrl+C to stop...")
+
+        while True:
+            time.sleep(1)
+
+    except KeyboardInterrupt:
+        print("\n\n=== STOPPING SERVICE ===")
+        service.stop()
+
+    print("Demo completed")

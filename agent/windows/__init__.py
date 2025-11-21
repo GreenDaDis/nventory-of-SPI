@@ -1,1 +1,2 @@
-from scanner import WindowsScanner
+from .scanner import WindowsScanner
+from .service import WindowsService
