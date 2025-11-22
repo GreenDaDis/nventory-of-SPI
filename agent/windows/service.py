@@ -2,8 +2,7 @@ import threading
 import time
 import json
 from datetime import datetime
-from agent.windows import WindowsScanner  # Импортируем наш предыдущий класс
-
+from scanner import WindowsScanner
 
 class WindowsService:
     """

@@ -1,8 +1,9 @@
 import winreg
 import subprocess
-import json
 import csv
 from datetime import datetime
+
+from system import SystemInfo
 
 
 class WindowsScanner:
@@ -15,6 +16,7 @@ class WindowsScanner:
         Initialize scanner
         """
         self.cache_data = None
+        self.system_info = SystemInfo()
 
     def _get_software_from_registry(self):
         """
@@ -208,19 +210,11 @@ class WindowsScanner:
         Returns:
             dict: JSON object with scan results
         """
-        print("Starting installed software scan...")
-
         # Collect data from different sources
-        print("1. Collecting information from registry...")
         registry_software = self._get_software_from_registry()
-        print(f"   Found {len(registry_software)} programs in registry")
-
-        print("2. Collecting information via WMIC...")
         wmic_software = self._get_software_from_wmic()
-        print(f"   Found {len(wmic_software)} programs via WMIC")
 
         # Merge results
-        print("3. Merging results...")
         all_software = self._merge_software_lists(registry_software, wmic_software)
 
         # Sort by name
@@ -228,20 +222,14 @@ class WindowsScanner:
 
         # Create result with proper structure
         result = {
+            'system_info': self.system_info.collect_all_info(),
             'scan_timestamp': datetime.now().isoformat(),
             'software_count': len(all_software),
-            'sources': {
-                'registry': len(registry_software),
-                'wmic': len(wmic_software)
-            },
             'software_list': all_software
         }
 
         # Save to memory cache
         self.cache_data = result
-
-        print(f"Scan completed. Found {len(all_software)} software total")
-
         return result
 
     def get_data(self):
@@ -264,7 +252,6 @@ class WindowsScanner:
         Clear memory cache
         """
         self.cache_data = None
-        print("Memory cache cleared")
 
     def get_software_names(self):
         """
