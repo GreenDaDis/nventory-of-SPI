@@ -15,13 +15,6 @@ async def agent_data_handler(request):
     """
     try:
         # Get the main app instance
-        app = request.app
-        if hasattr(app, 'received_data'):
-            received_data = app.received_data
-        else:
-            # Fallback if running without ServerApp class
-            received_data = []
-
         # Parse JSON data
         try:
             data = await request.json()
@@ -31,13 +24,9 @@ async def agent_data_handler(request):
                 {"error": "Invalid JSON data"},
                 status=400
             )
-
         # Log the received data
         hostname = data.get('system_info', {}).get('system', {}).get('hostname', 'Unknown')
         logger.info(f"Received agent data from: {hostname}")
-
-        # Print to console
-        print_agent_data(data)
 
         return web.json_response({
             "status": "success",
