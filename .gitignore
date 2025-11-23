@@ -3,5 +3,6 @@
 agent/__pycache__/*
 tests/__pycache__/*
 tests/agent/__pycache__/*
-server/handlers/__pycache__/
-tests/server/__pycache__/
+server/handlers/__pycache__/*
+tests/server/__pycache__/*
+agent/windows/__pycache__/*

@@ -13,7 +13,7 @@ class Settings:
         'server_address': '127.0.0.1',
         'server_port': 8080,
         'timeout_scan': 3600,
-        'timeout_send': 300
+        'timeout_send': 3600
     }
 
     def __init__(self, config_file: str = "config.json"):
